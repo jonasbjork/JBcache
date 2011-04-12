@@ -43,7 +43,7 @@ class JBCache {
 	$m_time = $m_time[0] + $m_time[1];
 	$endtime = $m_time;
 	$totaltime = ($endtime - $this->starttime);
-	echo "Page loading took:". round($totaltime, $rounder) ." seconds";
+	echo "<!-- Page loading took:". round($totaltime, $rounder) ." seconds -->";
     }
     
     /**
@@ -58,21 +58,22 @@ class JBCache {
         }
         
         $this->cachefile = CACHE_DIR.sha1($identifier).".html.gz";
-        if (file_exists($this->cachefile) && (time() - CACHE_TIME < filemtime($this->cachefile))) {
-	    ob_start();
+	
+	
+	if (file_exists($this->cachefile) && (time() - CACHE_TIME < filemtime($this->cachefile))) {
 	    readgzfile($this->cachefile);
-	    ob_end_flush();
-            printf("<!-- Generated from jbCache - %s -->\n", date("Y-m-d H:i:s", filemtime($this->cachefile)));
+	    printf("<!-- Generated from jbCache - %s -->\n", date("Y-m-d H:i:s", filemtime($this->cachefile)));
             exit;
-        }
+        }else{
         if (!is_writeable(CACHE_DIR)) return FALSE;
-
-        $this->fp = fopen(gzuncompress($this->cachefile, 9), 'w');
+	
+	$this->fp = fopen($this->cachefile, 'c');
         if (!$this->fp) return FALSE;
 
         $this->has_cache = TRUE;
         ob_start();
         return true;
+	}
     }
 
     /**
@@ -83,7 +84,7 @@ class JBCache {
     public function stop() {
         if (!$this->has_cache) return FALSE;
         if ($this->fp) {
-            fwrite($this->fp, gzcompress(ob_get_contents(), 9));
+            fwrite($this->fp, gzencode(ob_get_contents(), 9));
             fclose($this->fp);
             ob_end_flush();
             return TRUE;
