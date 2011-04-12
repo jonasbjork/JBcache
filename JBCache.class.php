@@ -59,7 +59,9 @@ class JBCache {
         
         $this->cachefile = CACHE_DIR.sha1($identifier).".html.gz";
         if (file_exists($this->cachefile) && (time() - CACHE_TIME < filemtime($this->cachefile))) {
-            include $this->cachefile;
+	    ob_start();
+	    readgzfile($this->cachefile);
+	    ob_end_flush();
             printf("<!-- Generated from jbCache - %s -->\n", date("Y-m-d H:i:s", filemtime($this->cachefile)));
             exit;
         }
