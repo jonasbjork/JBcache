@@ -41,13 +41,16 @@ class JBCache {
         
         $this->cachefile = CACHE_DIR.sha1($identifier).".html.gz";
         if (file_exists($this->cachefile) && (time() - CACHE_TIME < filemtime($this->cachefile))) {
-            include $this->cachefile;
-            printf("<!-- Generated from jbCache - %s -->\n", date("Y-m-d H:i:s", filemtime($this->cachefile)));
+            #include $this->cachefile;
+            $the_file = gzopen($this->cachefile, 'r');
+	    gzpassthru($the_file);
+	    gzclose($the_file);
+	    printf("<!-- Generated from jbCache - %s -->\n", date("Y-m-d H:i:s", filemtime($this->cachefile)));
             exit;
         }
         if (!is_writeable(CACHE_DIR)) return FALSE;
 
-        $this->fp = fopen(gzuncompress($this->cachefile, 9), 'w');
+        $this->fp = fopen($this->cachefile, 'w');
         if (!$this->fp) return FALSE;
 
         $this->has_cache = TRUE;
