@@ -2,6 +2,8 @@
 /**
  * JBCache is a filecache class for PHP
  * Written by Jonas Björk <jonas.bjork@aller.se>
+ * 
+ * Gzip-compression added by David V. Wallin <david@dwall.in>
  *
  * (C)2011 Aller Digitala Affärer, Aller media AB
  * Licensed under GNU General Public License v2
@@ -16,7 +18,7 @@ class JBCache {
     private $cachefile;
     private $fp;
     private $has_cache;
-
+        
     /**
      * Construction area. Please bring some concrete.
      */
@@ -25,7 +27,7 @@ class JBCache {
         $this->fp = NULL;
         $this->has_cache = FALSE;
     }
-
+    
     /**
      * Start the cache wrapper
      *
@@ -37,17 +39,15 @@ class JBCache {
             $this->purge_probe();
         }
         
-        $this->cachefile = CACHE_DIR.sha1($identifier).".html";
-
+        $this->cachefile = CACHE_DIR.sha1($identifier).".html.gz";
         if (file_exists($this->cachefile) && (time() - CACHE_TIME < filemtime($this->cachefile))) {
             include $this->cachefile;
             printf("<!-- Generated from jbCache - %s -->\n", date("Y-m-d H:i:s", filemtime($this->cachefile)));
             exit;
         }
-
         if (!is_writeable(CACHE_DIR)) return FALSE;
 
-        $this->fp = fopen($this->cachefile, 'w');
+        $this->fp = fopen(gzuncompress($this->cachefile, 9), 'w');
         if (!$this->fp) return FALSE;
 
         $this->has_cache = TRUE;
@@ -63,7 +63,7 @@ class JBCache {
     public function stop() {
         if (!$this->has_cache) return FALSE;
         if ($this->fp) {
-            fwrite($this->fp, ob_get_contents());
+            fwrite($this->fp, gzcompress(ob_get_contents(), 9));
             fclose($this->fp);
             ob_end_flush();
             return TRUE;
