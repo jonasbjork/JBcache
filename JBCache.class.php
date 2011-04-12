@@ -19,6 +19,11 @@ class JBCache {
     private $fp;
     private $has_cache;
         
+    private $m_time;
+    private $starttime;
+    private $endtime;
+    private $totaltime;
+    
     /**
      * Construction area. Please bring some concrete.
      */
@@ -26,6 +31,19 @@ class JBCache {
         $this->cachefile = "";
         $this->fp = NULL;
         $this->has_cache = FALSE;
+	
+	$m_time = explode(" ",microtime());
+	$m_time = $m_time[0] + $m_time[1];
+	$this->starttime = $m_time;
+    }
+    
+    public function __destruct() {
+	$rounder = 6;
+	$m_time = explode(" ",microtime());
+	$m_time = $m_time[0] + $m_time[1];
+	$endtime = $m_time;
+	$totaltime = ($endtime - $this->starttime);
+	echo "Page loading took:". round($totaltime, $rounder) ." seconds";
     }
     
     /**
