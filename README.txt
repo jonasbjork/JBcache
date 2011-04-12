@@ -4,6 +4,7 @@ Webpage : http://aller.se/
 Version : 1.0
 Date    : 2011-04-12
 License : GNU General Public License, GPLv2
+Contribution: David V. Wallin <david@dwall.in>
 
 JBCache is a PHP class for filecaching. Useful for any webpage that
 does have dynamic content that does not update in real time.
