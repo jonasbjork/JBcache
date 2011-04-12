@@ -11,7 +11,6 @@
   }
 ?>
 <p>No wonder we want an crystal ball, right?</p>
-<!-- Really cool code, right? ;) -->
 </body>
 <?php
   if ($cache->has_cache()) {
