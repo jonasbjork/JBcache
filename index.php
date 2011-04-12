@@ -7,10 +7,24 @@
 <p>If you had an crystal ball you could see that...</p>
 <?php
   for ($i=0; $i<20; $i++) {
+<<<<<<< HEAD
           printf("The magic number is: %d<br />", $i);
   }
 ?>
 <p>No wonder we want an crystal ball, right?</p>
+=======
+      $num = mt_rand(5, 15);
+      for ($u=0; $u<20; $u++) {
+	  $tot = $num * $i;
+	  $tot = $tot * $u;
+	  $tot = $tot * $tot;
+      }
+          printf("The magic number is: %d<br />", $tot);
+  }
+?>
+<p>No wonder we want an crystal ball, right?</p>
+<!-- Really cool code, right? ;) -->
+>>>>>>> release/complete-gzip-support
 </body>
 <?php
   if ($cache->has_cache()) {
