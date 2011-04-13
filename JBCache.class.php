@@ -3,7 +3,7 @@
  * JBCache is a filecache class for PHP
  * Written by Jonas Björk <jonas.bjork@aller.se>
  * 
- * Gzip-compression added by David V. Wallin <david@dwall.in>
+ * Contributing Developer: David V. Wallin <david@dwall.in>
  *
  * (C)2011 Aller Digitala Affärer, Aller media AB
  * Licensed under GNU General Public License v2
@@ -12,7 +12,7 @@ define('CACHE_DIR', "cache/"); // cache directory
 define('CACHE_TIME', 5*60); // cache time in seconds
 define('PURGE_USE', TRUE); // automatic purge of cache?
 define('PURGE_FACTOR', 100); // probability of cache purge, low number means higher probability
-define('CACHE_GZIP', TRUE); // want gzip-compression or not?
+define('GZIP_COMPRESSION', TRUE); // want gzip-compression or not?
 
 class JBCache {
 
@@ -46,6 +46,40 @@ class JBCache {
 	$totaltime = ($endtime - $this->starttime);
 	echo "<!-- Page loading took:". round($totaltime, $rounder) ." seconds -->";
     }
+
+    /**
+     * Should we show compressed content or not?
+     * 
+     * @param none
+     * @return Nothing - Includes or reads the file
+     * @author David V. Wallin <david@dwall.in>
+     */
+    private function show_cached_content() {
+	if ( GZIP_COMPRESSION == TRUE ) {
+	    readgzfile($this->cachefile);
+	}elseif ( GZIP_COMPRESSION == FALSE ) {
+	    include($this->cachefile);
+	}else{
+	    return false;
+	}
+    }
+    
+    /**
+     * Set the name of the cached file
+     * 
+     * @param string $identifier Something to identify the file you're caching.
+     * @return string With either .html or .html.gz as a fileending
+     * @author David V. Wallin <david@dwall.in>
+     */
+    private function start_cache_file($identifier = NULL) {
+	if ( GZIP_COMPRESSION == TRUE ) {
+	    return CACHE_DIR.sha1($identifier).".html.gz";
+	}elseif ( GZIP_COMPRESSION == FALSE ) {
+	    return CACHE_DIR.sha1($identifier).".html";
+	}else{
+	    return false;
+	}
+    }
     
     /**
      * Start the cache wrapper
@@ -58,9 +92,10 @@ class JBCache {
             $this->purge_probe();
         }
         
-        $this->cachefile = CACHE_DIR.sha1($identifier).".html.gz";
+        $this->cachefile = $this->start_cache_file($identifier);
+	
 	if (file_exists($this->cachefile) && (time() - CACHE_TIME < filemtime($this->cachefile))) {
-	    readgzfile($this->cachefile);
+	    $this->show_cached_content();
 	    printf("<!-- Generated from jbCache - %s -->\n", date("Y-m-d H:i:s", filemtime($this->cachefile)));
             exit;
         }else{
@@ -73,7 +108,24 @@ class JBCache {
         return true;
 	}
     }
-
+    
+    /**
+     * Writes the file-content to the cached file. Either compressed or not.
+     * 
+     * @param none
+     * @return false if GZIP_COMPRESSION isn't defined otherwise just writes.
+     * @author David V. Wallin <david@dwall.in>
+     */
+    private function write_file_content() {
+	if ( GZIP_COMPRESSION == TRUE ) {
+	    fwrite($this->fp, gzencode(ob_get_contents(), 9));
+	}elseif ( GZIP_COMPRESSION == FALSE ) {
+	    fwrite($this->fp, ob_get_contents());
+	}else{
+	    return false;
+	}
+    }
+    
     /**
      * Stop the cache wrapper, save rendered page to file.
      *
@@ -82,7 +134,7 @@ class JBCache {
     public function stop() {
         if (!$this->has_cache) return FALSE;
         if ($this->fp) {
-            fwrite($this->fp, gzencode(ob_get_contents(), 9));
+            $this->write_file_content();
             fclose($this->fp);
             ob_end_flush();
             return TRUE;
