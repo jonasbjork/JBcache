@@ -12,6 +12,7 @@ define('CACHE_DIR', "cache/"); // cache directory
 define('CACHE_TIME', 5*60); // cache time in seconds
 define('PURGE_USE', TRUE); // automatic purge of cache?
 define('PURGE_FACTOR', 100); // probability of cache purge, low number means higher probability
+define('CACHE_GZIP', TRUE); // want gzip-compression or not?
 
 class JBCache {
 
