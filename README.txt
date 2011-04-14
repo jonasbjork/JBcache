@@ -12,7 +12,18 @@ does have dynamic content that does not update in real time.
 Using an identifier for the start() method that is same every time a
 page is being requested is highly recommended!
 
-Everything between start() end stop() will be cached!
+Changelog:
+== 2011-04-14 ==
+* Added David V. Wallins patch for gzip compression.
+* Rewrote some of the gzip code.
+* Making use of destructor for stopping cache and writing file, making it 
+  easier to use the cache class. Now you only have to include class-file 
+  and instantiate the object with identifier as parameter to start cache.
+* Did some code idention clean up.
+
+== 2011-04-12 ==
+* First relase of JBCache.
+* Caches output to html file.
 
 Example of usage:
 
@@ -36,11 +47,20 @@ Ok, that would do alot of PHP-parsing wouldn't it? Well this example
 is not cpu-demanding at all, that is almost. Now let's bring some nice
 file cache to the file.
 
-==START_OF_FILE==
-<?php
+You can use one of these methods:
   require_once('JBCache.class.php');
   $cache = new JBCache();
   $cache->start($_SERVER['REQUEST_URI']);
+Or
+  require_once('JBCache.class.php');
+  $cache = new JBCache($_SERVER['REQUEST_URI']);
+
+You probably can put that $cache = line into end of JBCache.class.php too..
+
+==START_OF_FILE==
+<?php
+  require_once('JBCache.class.php');
+  $cache = new JBCache($_SERVER['REQUEST_URI']);
 ?>
 <body>
 <p>If you had an crystal ball you could see that...</p>
@@ -52,11 +72,6 @@ file cache to the file.
 <p>No wonder we want an crystal ball, right?</p>
 <!-- Really cool code, right? ;) -->
 </body>
-<?php
-  if ($cache->has_cache()) {
-    $cache->stop($_SERVER['REQUEST_URI']);
-  }
-?>
 ==END_OF_FILE==
 
 The trick is to wrap your normal php/html-file with JBCache. That's all!
