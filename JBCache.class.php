@@ -14,7 +14,7 @@ define('CACHE_TIME', 5 * 60); // cache time in seconds
 define('PURGE_USE', TRUE); // automatic purge of cache?
 define('PURGE_FACTOR', 100); // probability of cache purge, low number means higher probability
 define('GZIP_COMPRESSION', TRUE); // want gzip-compression or not?
-define('GZIP_LEVEL', 9); // define compression level (1-9, where 9 is highest)
+define('GZIP_LEVEL', 3); // define compression level (1-9, where 9 is highest)
 
 class JBCache {
 
@@ -57,8 +57,7 @@ class JBCache {
      */
     private function show_cached_content() {
         if (GZIP_COMPRESSION == TRUE) {
-            header('Content-Encoding: gzip');
-            readfile($this->cachefile);
+            readgzfile($this->cachefile);
         } elseif (GZIP_COMPRESSION == FALSE) {
             include($this->cachefile);
         } else {
@@ -121,13 +120,15 @@ class JBCache {
      * @author David V. Wallin <david@dwall.in>
      */
     private function write_file_content() {
+        $page = ob_get_contents();
         if (GZIP_COMPRESSION == TRUE) {
-            fwrite($this->fp, gzencode(ob_get_contents(), GZIP_LEVEL));
+            fwrite($this->fp, gzencode($page, GZIP_LEVEL));
         } elseif (GZIP_COMPRESSION == FALSE) {
-            fwrite($this->fp, ob_get_contents());
+            fwrite($this->fp, $page);
         } else {
             return false;
         }
+	return $page;
     }
 
     /**
@@ -150,6 +151,7 @@ class JBCache {
             $this->write_file_content();
             fclose($this->fp);
             ob_end_flush();
+	    print $page; 
             $this->has_cache = FALSE;
             return TRUE;
         } else {
