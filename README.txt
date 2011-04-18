@@ -13,6 +13,15 @@ Using an identifier for the start() method that is same every time a
 page is being requested is highly recommended!
 
 Changelog:
+== 2011-04-18 ==
+* Lowered default gzip compression level to 3. Nine (9) is too cpu-intense
+  in relation to what we get out of it.
+* Using readgzfile() instead of readfile() for publishing a cached page.
+  In some cases readfile() did not work.
+* Sebastian Thulin reported that when creating cache file we did not print
+  content (page). First user got a white (blank) page until reload of page
+  were done.
+
 == 2011-04-14 ==
 * Added David V. Wallins patch for gzip compression.
 * Rewrote some of the gzip code.
